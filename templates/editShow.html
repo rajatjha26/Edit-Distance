@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Edit-Distance</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap-3.3.5-dist/css/bootstrap.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static',filename='responsive.css') }}" type="text/css">
+    <script src="{{ url_for('static',filename='jquery.js')}} "></script>
+		<script src="{{ url_for('static',filename='bootstrap-3.3.5-dist/js/bootstrap.js')}}"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+	</head>
+	<body>
+		<div>
+			<div class="page-header">
+				<h1 style="color:#d81b79; text-align: center; font-style: italic;">Edit-Distance</h1>
+				
+			</div>
+			
+			<form class="form-inline" id="upload" method="post" enctype="multipart/form-data" role="form">
+				<div class="form-group col-12 col-m-12">
+          <label class="btn btn-primary" style="margin-right: 30%" for="my-file-selector" >
+            <input id="inpageinput" onchange="putInputinsrc(this.files[0])" style="color:black;" type="file">
+          </label>
+          <label class="btn btn-primary" for="my-file-selector" >
+            <input id="inpageinput" onchange="putInputintrg(this.files[0])" style="color:black;" type="file">
+          </label>&nbsp;&nbsp;<br>
+    
+          <p>
+            <span style="text-align: left; margin-right: 60%; font-size: large;">Source</span>
+            <span style="text-align: right; font-size: large">Target</span>
+          </p>
+          <div class="flex-container">
+            <div id="source" class ="item"contenteditable="true" ></div>
+            <div id="target" class ="item" contenteditable="true"></div>
+          </div>
+          <a href= "#" id="test">
+            <input style="color:black; background-color: cadetblue; margin: 10px; padding: 5px;" type="submit" id="submit" value="Show Edit-Distance">
+          </a>
+        <div id="edit_val"></div>
+				</div> 
+			</form>
+		</div>
+	</body>
+<script> 
+    let putInputinsrc=(file)=>{
+        let reader = new FileReader();
+        reader.onload = function(e) {
+        let data=e.target.result.replace(/\n/g, "<hr>");
+        document.getElementById("source").innerHTML=data;
+        };
+        reader.readAsText(file);
+    }
+    let putInputintrg=(file)=>{
+        let reader = new FileReader();
+        reader.onload = function(e) {
+        let data=e.target.result.replace(/\n/g, "<hr>");
+        document.getElementById("target").innerHTML=data;
+        };
+        reader.readAsText(file);
+    }
+    $('a#test').bind('click', function(event) {
+      event.preventDefault();
+      document.querySelectorAll('.Remove').forEach(e => e.remove());
+      document.querySelectorAll('.Delete').forEach(e => e.remove());
+      let src = document.getElementById('source').innerHTML;
+      src=src.replace(/<hr>/g, "\n");
+      src=src.replace(/<[^>]*>/g, "");
+      let trg = document.getElementById('target').innerHTML;
+      trg=trg.replace(/<hr>/g, "\n");
+      trg=trg.replace(/<[^>]*>/g, "");
+      $.ajax({
+        method: "POST",
+        url: "postmethod", //here can be '/postmethod'
+        dataType: 'text',
+        data: {"text1": src,"text2":trg},
+        success: function(arr) {
+          arr=JSON.parse(arr);
+          let trg_data=""
+          let edit_dist=""
+          for (let i = 0; i < arr.length; i++){
+          let obj = arr[i];
+          for (let key in obj){
+            if(key=="sent"){
+              trg_data=trg_data.concat(obj[key]);
+            }
+            else{
+              edit_dist=edit_dist.concat(obj[key])+"<br>";
+            }
+          }
+          }
+          document.getElementById('target').innerHTML=trg_data;
+          document.getElementById('edit_val').innerHTML=edit_dist;
+          
+        }
+      });
+    });
+</script>
+</html>
